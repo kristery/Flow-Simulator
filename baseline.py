@@ -1,5 +1,4 @@
 from env.flow_lib import flow_env
-
 import numpy as np
 
 env, env_name = flow_env(render=True, use_inflows=True)
