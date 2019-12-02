@@ -64,7 +64,7 @@ def get_flow_params(col_num, row_num, additional_net_params):
     flow.core.params.NetParams
         network-specific parameters used to generate the network
     """
-    prob = {8: 0.6, 9: 0.3, 6:0.2, 7: 0.3, 10: 0.5, 11:0.15}
+    prob = {8: 0.1, 9: 0.1, 6:0.8, 7: 0.8, 10: 0.1, 11:0.1, 2: 0.8, 3: 0.8}
     
     initial = InitialConfig(
         spacing='custom', lanes_distribution=float('inf'), shuffle=True)

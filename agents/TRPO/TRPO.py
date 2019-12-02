@@ -87,8 +87,8 @@ def update_params(batch, policy_net, value_net, gamma, tau, l2_reg, max_kl, damp
 
 class TRPO(object):
     def __init__(self, obs_dim, act_dim, normalizer):
-        self.policy_net = StochasticPolicy(obs_dim, act_dim, hidden_dim=200, normalizer=normalizer)
-        self.value_net = Value(obs_dim, hidden_dim=200, normalizer=normalizer)
+        self.policy_net = StochasticPolicy(obs_dim, act_dim, hidden_dim=300, normalizer=normalizer)
+        self.value_net = Value(obs_dim, hidden_dim=300, normalizer=normalizer)
 
         self.type = 'TRPO'
 
