@@ -12,7 +12,7 @@ for i in range(1):
     state = env.reset()
     reward_sum = 0
     for j in range(100000):
-        action = np.zeros(act_dim)
+        action = np.ones(act_dim)
         next_state, reward, done, _ = env.step(action)
         reward_sum += reward
         print(reward)
