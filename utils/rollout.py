@@ -78,7 +78,7 @@ def select_action(policy, state):
     else:
         p = policy(state)
         action = (p > 0.5).double()
-        m = Bernoulli(torch.ones(p.shape) * 0.2)
+        m = Bernoulli(torch.ones(p.shape) * 0.4)
         noise = m.sample().to(device)
         action = ((noise - action) != 0).double()
 

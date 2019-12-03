@@ -1,4 +1,6 @@
 from env.flow_lib import flow_env
+from torch.distributions.bernoulli import Bernoulli
+import torch
 import numpy as np
 
 env, env_name = flow_env(render=True, use_inflows=True)
@@ -12,12 +14,15 @@ for i in range(1):
     state = env.reset()
     reward_sum = 0
     for j in range(100000):
-        action = np.ones(act_dim)
+        #action = np.zeros(act_dim)
+        #action = np.random.choice(2, act_dim)
+        m = Bernoulli(torch.ones(act_dim) * 0.1)
+        action = m.sample().detach().numpy()
         next_state, reward, done, _ = env.step(action)
         reward_sum += reward
         print(reward)
-        if done:
-            break
+        #if done:
+        #    break
     rewards0.append(reward_sum)
 """
 for i in range(3):
