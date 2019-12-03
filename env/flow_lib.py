@@ -144,7 +144,7 @@ grid_array = {
 
 additional_env_params = {
         'target_velocity': 50,
-        'switch_time': 6.0,
+        'switch_time': 5.0,
         'num_observed': 4,
         'discrete': False,
         'tl_type': 'controlled'
