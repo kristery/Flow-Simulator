@@ -1,4 +1,5 @@
 from env.flow_lib import flow_env
+from utils.rollout import evaluate
 import torch
 from torch.distributions.bernoulli import Bernoulli
 import numpy as np
@@ -8,6 +9,10 @@ from models.agent import StochasticPolicy, Policy
 
 env, env_name = flow_env(render=False, use_inflows=True)
 print("simulated task: {}".format(env_name))
+
+env.seed(8021)
+torch.manual_seed(8021)
+np.random.seed(8021)
 
 act_dim = env.action_space.shape[0]
 obs_dim = env.observation_space.shape[0]
@@ -22,6 +27,9 @@ else:
 
 checkpoint = torch.load('./model_log/' + filename)
 actor.load_state_dict(checkpoint['model_state_dict'])
+actor.eval()
+print(evaluate(actor.double(), env, 1000))
+"""
 reward_sum = 0.
 
 for i in range(1):
@@ -33,10 +41,10 @@ for i in range(1):
         action = a.cpu().data[0].numpy()
         #print('prob:', actor(s))
         next_state, reward, done, _ = env.step(action)
-        #print(action, reward)
+        print(action, reward)
         reward_sum += reward
         state = next_state
         if done:
             break
 print('total_reward: {}'.format(reward_sum))
-
+"""

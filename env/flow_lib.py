@@ -212,14 +212,15 @@ flow_params = dict(
 )
 
 
-def flow_env(use_inflows=False, render=True):
+def flow_env(use_inflows=False, render=True, sim_step=0.1):
     global flow_params
     flow_params['sim'] = SumoParams(
-                            sim_step=0.1,
+                            sim_step=sim_step,
                             render=render,
-                            restart_instance=True # for long horizon and visualization
+                            restart_instance=True, # for long horizon and visualization
+                            print_warnings=False,
+                            seed=8021
                             )
-    print(flow_params)
     """
     Parameters
     ----------

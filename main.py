@@ -29,7 +29,8 @@ np.random.seed(args.seed)
 ###############
 
 def save_policy(steps, actor):
-    filename = '{}_{}'.format(args.pg_type, steps)
+    ps = '_{}'.format(args.ps) if args.ps != '' else ''
+    filename = '{}{}_{}'.format(args.pg_type, ps, steps)
     torch.save({
                 'steps': steps,
                 'model_state_dict': actor.state_dict()
@@ -52,7 +53,6 @@ else:
     assert NotImplementedError
 
 for i_episode in range(args.num_episodes):
-    state = env.reset()
     save_policy(total_steps, policy.get_actor())
 
     ### evaluation
