@@ -7,6 +7,7 @@ env, env_name = flow_env(render=False, use_inflows=True)
 print("simulated task: {}".format(env_name))
 
 act_dim = env.action_space.shape
+print(env.observation_space.shape)
 rewards = []
 
 ratios = [0.1 * float(item) for item in range(10)]

@@ -11,9 +11,10 @@ print("simulated task: {}".format(env_name))
 
 act_dim = env.action_space.shape[0]
 obs_dim = env.observation_space.shape[0]
+print(obs_dim)
 normalizer = Normalizer(obs_dim)
 
-filename = 'ppo_test_noent_88000'
+filename = 'ppo_less_state_124000'
 ### load RL policy ###
 if 'ppo' in filename:
     actor = StochasticPolicy(obs_dim, act_dim, 300, normalizer=normalizer).to(device)
@@ -33,7 +34,7 @@ for i in range(1):
         action = a.cpu().data[0].numpy()
         #print('prob:', actor(s))
         next_state, reward, done, _ = env.step(action)
-        #print(action, reward)
+        print(action, reward)
         reward_sum += reward
         state = next_state
         if done:
