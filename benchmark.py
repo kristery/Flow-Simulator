@@ -10,16 +10,19 @@ act_dim = env.action_space.shape
 print(env.observation_space.shape)
 rewards = []
 
-ratios = [0.1, 0.1, 0.1]
+ratios = [0.1 * float(item) for item in range(10)]
 
 for ratio in ratios:
     state = env.reset()
+    reward_sum = 0
     for j in range(100000):
         #action = np.zeros(act_dim)
         #action = np.random.choice(2, act_dim)
         m = Bernoulli(torch.ones(act_dim) * ratio)
         action = m.sample().detach().numpy()
-        next_state, reward, done, info = env.step(action)
-        print(reward, info)
+        next_state, reward, done, _ = env.step(action)
+        reward_sum += reward
         if done:
             break
+    rewards.append(reward_sum)
+    print('{:.1f}\t{}\n'.format(ratio, reward_sum))

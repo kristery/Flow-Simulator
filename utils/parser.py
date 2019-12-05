@@ -16,7 +16,7 @@ def parser():
                         help='random seed (default: 8021')
     parser.add_argument('--batch-size', type=int, default=4000, metavar='N',
                         help='size of a single batch')
-    parser.add_argument('--num-epochs', type=int, default=100, metavar='N',
+    parser.add_argument('--num-epochs', type=int, default=500, metavar='N',
                         help='number of epochs to train an expert')
     parser.add_argument('--hidden-dim', type=int, default=100, metavar='H',
                         help='dimension of hidden layers of architectures')

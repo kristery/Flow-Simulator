@@ -41,3 +41,11 @@ check out **flow/flow/envs** for detailed information
 
 ### Notes
   * step function is at flow/envs/base.py
+
+### Useful Functions
+  * env.k.vehicle.get_speed(veh_id)
+  * env.k.network.max_speed()
+  * env.network.node_mapping: iteratively give node and edge
+  * env.k.vehicle.get_edge(veh_id): current edge veh_id is at
+  * env.k.vehicle.get_ids_by_edge(edge): gives ids
+    * for k in env.k.network.get_edge_list()
