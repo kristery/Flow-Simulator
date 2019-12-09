@@ -118,7 +118,7 @@ def get_non_flow_params(enter_speed, add_net_params):
 
 
 V_ENTER = 15
-INNER_LENGTH = 100
+INNER_LENGTH = 200 # 100
 LONG_LENGTH = 50
 SHORT_LENGTH = 100
 N_ROWS = 3
@@ -145,7 +145,7 @@ grid_array = {
 additional_env_params = {
         'target_velocity': 50,
         'switch_time': 4.0,
-        'num_observed': 4,
+        'num_observed': 10,
         'discrete': False,
         'tl_type': 'controlled'
     }
@@ -212,7 +212,7 @@ flow_params = dict(
 )
 
 
-def flow_env(use_inflows=False, render=True, sim_step=0.1):
+def flow_env(use_inflows=False, render=True, sim_step=1, horizon=2000):
     global flow_params
     flow_params['sim'] = SumoParams(
                             sim_step=sim_step,
@@ -220,6 +220,10 @@ def flow_env(use_inflows=False, render=True, sim_step=0.1):
                             restart_instance=True, # for long horizon and visualization
                             print_warnings=False,
                             seed=8021
+                            )
+    flow_params['env'] = EnvParams(
+                            horizon=horizon,
+                            additional_params=additional_env_params,
                             )
     """
     Parameters

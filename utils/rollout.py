@@ -6,6 +6,95 @@ import numpy as np
 from utils import device, MAX_LOOP
 from utils import Transition
 
+def ma_rollout(policies, env, batch_size):
+    num_inter = len(policies)
+    for policy in policies:
+        policy.to(device)
+
+    count_flag = np.zeros(num_inter)
+    count_down = np.zeros(num_inter)
+    temp_rewards = [[] for _ in range(num_inter)]
+    states = [[] for _ in range(num_inter)]
+    actions = [[] for _ in range(num_inter)]
+    next_states = [[] for _ in range(num_inter)]
+    masks = [[] for _ in range(num_inter)]
+    rewards = [[] for _ in range(num_inter)]
+
+    num_steps = 0
+    reward_batch = []
+    num_episodes = 0
+    reward_sum = 0.
+
+    while num_steps < batch_size:
+        info = [1. for _ in range(num_inter)]
+        state = env.reset()
+        #states.append(state)
+        for t in range(10000): # Don't infinite loop while learning
+            s = torch.from_numpy(state).to(device)
+            a = []
+            for idx in range(len(info)):
+                if info[idx] == 1:
+                    action = select_action(policies[idx], s[idx].unsqueeze(0))
+                    count_down[idx] = action
+                    count_flag[idx] = 1
+                    #print(state[idx], [action])
+                    states[idx].append(state[idx])
+                    actions[idx].append(action)
+                    masks[idx].append(1.)
+
+                if count_flag[idx] == 1:
+                    if count_down[idx] - env.sim_step < 0:
+                        a.append(1.)
+                        count_flag[idx] = 0
+                        count_down[idx] = 0
+                    else:
+                        count_down[idx] -= env.sim_step
+                        a.append(0.)
+                else:
+                    a.append(0.)
+            next_state, r, done, info = env.step(np.array(a))
+            reward_sum += sum(r)
+            for idx in range(len(info)):
+                temp_rewards[idx].append(r[idx])
+                if info[idx] == 1:
+                    next_states[idx].append(next_state[idx])
+                    rewards[idx].append(np.mean(temp_rewards[idx]))
+                    temp_rewards[idx] = []
+            #print([len(item) for item in states], 
+            #        [len(item) for item in next_states], done)
+            if done:
+                for idx in range(len(masks)):
+                    masks[idx][-1] = 0.
+                    if len(states[idx]) == (len(next_states[idx]) + 1):
+                        next_states[idx].append(next_state[idx])
+                        rewards[idx].append(np.mean(temp_rewards[idx]))
+                        temp_rewards[idx] = []
+                    elif len(states[idx]) != len(next_states[idx]):
+                        print(len(states[idx]), len(next_states[idx]), idx)
+                        raise Exception
+                break
+        num_steps += (t+1)
+        num_episodes += 1
+        
+    return states, actions, next_states, masks, rewards, reward_sum / num_episodes
+
+def ma_evaluate(policies, env, batch_size):
+    _, _, _, _, _, avg_rewards = ma_rollout(policies, env, batch_size)
+    return avg_rewards
+
+def ma_batch(policies, env, batch_size):
+    states, actions, next_states, masks, rewards, avg_reward = ma_rollout(policies, 
+                                                                        env, batch_size)
+    batches = []
+    for idx in range(len(states)):
+        batches.append(Transition(np.array(states[idx]),
+                                    np.array(actions[idx]),
+                                    np.array(masks[idx]).reshape(-1),
+                                    np.array(next_states[idx]),
+                                    np.array(rewards[idx]).reshape(-1)))
+    return batches
+
+
 def rollout(policy, env, batch_size):
     ### the following three lists are used to update the dynamic network
     policy.to(device)
@@ -72,15 +161,14 @@ def real_batch(policy, env, batch_size):
 
 def select_action(policy, state):
     if policy.type == 'stochastic':
-        p = policy(state)
-        m = Bernoulli(p)
-        action = m.sample()
+        mean, _, std = policy(state)
+        action = torch.normal(mean, std)
     else:
-        p = policy(state)
-        action = (p > 0.5).double()
-        m = Bernoulli(torch.ones(p.shape) * 0.4)
-        noise = m.sample().to(device)
-        action = ((noise - action) != 0).double()
+        mean = policy(state)
+        action = mean
 
-    action = torch.clamp(action, min=0, max=1)
-    return action
+    action = torch.clamp(action, min=-1, max=1)
+    # length of green light
+    # 15 ~ 125
+    action = (action * 55.) + 70
+    return action.cpu().data[0].numpy()

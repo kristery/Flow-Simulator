@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.distributions.normal import Normal
-from torch.distributions.bernoulli import Bernoulli
 
 import numpy as np
 
@@ -19,8 +18,8 @@ class Policy(nn.Module):
         #x = self.normalizer(x)
         x = F.relu(self.affine1(x))
         x = F.relu(self.affine2(x))
-        prob = torch.sigmoid(self.affine3(x))
-        return prob
+        x = torch.tanh(self.affine3(x))
+        return x
 
 
 class TD3Value(nn.Module):
@@ -72,9 +71,11 @@ class StochasticPolicy(nn.Module):
         self.affine1 = nn.Linear(num_inputs, hidden_dim)
         self.affine2 = nn.Linear(hidden_dim, hidden_dim)
 
-        self.action_prob = nn.Linear(hidden_dim, num_outputs)
+        self.action_mean = nn.Linear(hidden_dim, num_outputs)
         #self.action_mean.weight.data.mul_(0.1)
         #self.action_mean.bias.data.mul_(0.0)
+        self.action_log_std = nn.Parameter(torch.zeros(1, num_outputs))
+
         self.normalizer = normalizer
         self.type = 'stochastic'
 
@@ -83,12 +84,14 @@ class StochasticPolicy(nn.Module):
         x = torch.tanh(self.affine1(x))
         x = torch.tanh(self.affine2(x))
 
-        prob = torch.sigmoid(self.action_prob(x))
-        return prob
+        action_mean = torch.tanh(self.action_mean(x))
+        action_log_std = self.action_log_std.expand_as(action_mean)
+        action_std = torch.exp(action_log_std)
+        return action_mean, action_log_std, action_std
 
     def entropy(self, x):
-        p = self.forward(x)
-        m = Bernoulli(p) 
+        mean, log_std, std = self.forward(x)
+        m = Normal(mean, std)
         return m.entropy().mean()
     
 
@@ -107,6 +110,6 @@ class Value(nn.Module):
         #x = self.normalizer(x)
         x = torch.tanh(self.affine1(x))
         x = torch.tanh(self.affine2(x))
-    
+
         state_values = self.value_head(x)
         return state_values

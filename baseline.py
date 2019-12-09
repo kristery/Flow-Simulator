@@ -20,6 +20,8 @@ for ratio in ratios:
         m = Bernoulli(torch.ones(act_dim) * ratio)
         action = m.sample().detach().numpy()
         next_state, reward, done, info = env.step(action)
-        print(reward, info)
+        print(reward)
+        print(info)
+        #print(next_state)
         if done:
             break

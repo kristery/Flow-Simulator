@@ -12,6 +12,7 @@ rewards = []
 
 ratios = [0.1 * float(item) for item in range(10)]
 
+
 for ratio in ratios:
     state = env.reset()
     reward_sum = 0
@@ -20,9 +21,9 @@ for ratio in ratios:
         #action = np.random.choice(2, act_dim)
         m = Bernoulli(torch.ones(act_dim) * ratio)
         action = m.sample().detach().numpy()
-        next_state, reward, done, _ = env.step(action)
+        next_state, reward, done, info = env.step(action)
         reward_sum += reward
         if done:
             break
     rewards.append(reward_sum)
-    print('{:.1f}\t{}\n'.format(ratio, reward_sum))
+    print('{:.1f}\t{}'.format(ratio, reward_sum))

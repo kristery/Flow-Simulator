@@ -9,8 +9,8 @@ from utils import device
 
 
 def surrogate_loss(policy_net, advantages, states, old_policy, actions):
-    prob = policy_net(states)
-    new_policy = log_density(actions, prob)
+    mean, log_std, std = policy_net(states)
+    new_policy = log_density(actions, mean, std, log_std)
     ratio = torch.exp(new_policy - old_policy)
     surrogate = ratio * advantages
     return surrogate, ratio
@@ -45,15 +45,15 @@ class PPO(object):
         self.policy_net.to(device)
         self.value_net.to(device)
 
-    def train(self, batch, entropy_coef=0, n_iter=1, batch_size=1024, clip_param=0.2):
+    def train(self, batch, entropy_coef=1e-3, n_iter=1, batch_size=16, clip_param=0.2):
         states = torch.Tensor(batch.state).to(device)
         actions = torch.Tensor(batch.action).to(device)
         returns, advantages = gae(batch, self.value_net, self.gamma, self.tau)
 
         #returns = (returns - returns.mean()) / (returns.std() + 1e-8)
 
-        prob = self.policy_net(states)
-        old_policy = log_density(actions, prob).detach()
+        mean, log_std, std = self.policy_net(states)
+        old_policy = log_density(actions, mean, std, log_std).detach()
         old_values = self.value_net(states).detach()
 
         for _ in range(n_iter):
