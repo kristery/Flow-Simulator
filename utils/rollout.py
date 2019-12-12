@@ -165,7 +165,8 @@ def select_action(policy, state):
         action = torch.normal(mean, std)
     else:
         mean = policy(state)
-        action = mean
+        std = torch.normal(torch.ones(mean.shape) * 0.1).to(device)
+        action = mean + std
 
     action = torch.clamp(action, min=-1, max=1)
     # length of green light

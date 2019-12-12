@@ -8,7 +8,7 @@ from utils.normalizer import Normalizer
 from models.agent import StochasticPolicy, Policy
 from agents.multi_agent import MultiAgent
 
-env, env_name = flow_env(render=True, use_inflows=True, sim_step=0.1, horizon=10000000)
+env, env_name = flow_env(render=True, use_inflows=True, sim_step=1, horizon=5000)
 print("simulated task: {}".format(env_name))
 
 act_dim = env.action_space.shape[0]
@@ -16,7 +16,8 @@ obs_dim = env.observation_space.shape[0]
 print(obs_dim)
 normalizer = Normalizer(obs_dim)
 
-filename = 'ppo_4250000'
+filename = 'ppo_4530000'
+#filename = 'ppo_0'
 #filename = 'td3_shortgreenpenalty_1332000'
 ### load RL policy ###
 policies = MultiAgent(obs_dim, 1, normalizer, 0.995, 0.9) 
@@ -24,7 +25,10 @@ policies.load_policies(filename)
 reward_sum = 0.
 
 ma_evaluate(policies.get_actor(), env, 2000)
-
+total_wait_time = 0.
+for key in env.eval_time:
+    total_wait_time += env.eval_time[key]
+print('avg waiting time: {}'.format(total_wait_time / len(env.eval_time.keys())))
 """
 for i in range(1):
     
