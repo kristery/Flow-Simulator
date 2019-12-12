@@ -16,11 +16,15 @@ obs_dim = env.observation_space.shape[0]
 print(obs_dim)
 normalizer = Normalizer(obs_dim)
 
-filename = 'ppo_4530000'
+filename = 'td3_lr3e-4_908000'
 #filename = 'ppo_0'
 #filename = 'td3_shortgreenpenalty_1332000'
 ### load RL policy ###
-policies = MultiAgent(obs_dim, 1, normalizer, 0.995, 0.9) 
+if 'ppo' in filename:
+    pg_type = 'ppo'
+elif 'td3' in filename:
+    pg_type = 'td3'
+policies = MultiAgent(obs_dim, 1, normalizer, 0.995, 0.9, pg_type=pg_type) 
 policies.load_policies(filename)
 reward_sum = 0.
 
